@@ -1,3 +1,9 @@
+let skadi = 0;
+let skadi_colider = 0;
+let aniList = [];
+let aniListCounter = 0;
+let skadiSide = 0; // 0 : left, 1: right
+
 
 const button = (scene, x, y, texture, cb) => {
     scene.add
@@ -9,7 +15,7 @@ const button = (scene, x, y, texture, cb) => {
 }
 
 class Example extends Phaser.Scene
-{
+{   
 
     constructor ()
     {
@@ -35,28 +41,28 @@ class Example extends Phaser.Scene
     create ()
     {
         this.matter.world.setBounds();
-        let counter = 7;
+        aniListCounter = 7;
         
-        let skadi = this.add.spine(400, 600, 'skadi_summer', 'custom/move', true);
+        skadi = this.add.spine(400, 600, 'skadi_summer', 'custom/move', true);
         skadi.setInteractive()
         
         this.input.enableDebug(skadi, 0xff00ff);
 
-        let aniList = skadi.getAnimationList();
+        aniList = skadi.getAnimationList();
         console.log(aniList);
 
         button(this, 120, 50, 'up', () => {
             console.log("click");
 
-            if(counter == 0) {
-                counter = 5;
-            }else if(counter == 5){
-                counter = 7;
+            if(aniListCounter == 0) {
+                aniListCounter = 5;
+            }else if(aniListCounter == 5){
+                aniListCounter = 7;
             }else {
-                counter = 0
+                aniListCounter = 0
             }
 
-            skadi.play(aniList[counter], true);
+            skadi.play(aniList[aniListCounter], true);
 
         })
 
@@ -69,23 +75,69 @@ class Example extends Phaser.Scene
         console.log(skadi.input);
         
         this.matter.add.mouseSpring();
-
-        let skadi_body = this.matter.add.rectangle(skadi.x, skadi.y, skadi.width, skadi.height);
         
-        skadi_body.isStatic = true;
-        console.log(skadi_body);
-
-        const ellipse = this.add.ellipse(
-            400, 100, 200, 100
+        skadi_colider = this.add.ellipse(
+            skadi.x, skadi.y - skadi.height / 2, skadi.width / 2, skadi.height
         );
-        ellipse.setStrokeStyle(2, 0x1a65ac);
-        const points = ellipse.pathData.slice(0, -2).join(' ');
-        this.shield = this.matter.add.gameObject(ellipse, {
-            shape: { type: 'fromVerts', verts: points, flagInternal: true }
+        skadi_colider.setStrokeStyle(2, 0x1a65ac);
+        const points = skadi_colider.pathData.slice(0, -2).join(' ');
+        this.shield = this.matter.add.gameObject(skadi_colider, {
+            shape: { type: 'fromVerts', verts: points, flagInternal: true },
+            isStatic : true
         });
+        
+        
+        //skadi_colider = ellipse;
+
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+        
+    }
+
+    update() {
+        
+        if (this.cursors.left.isDown)
+        {
+            if(aniListCounter != 7) {
+                aniListCounter = 7;
+                skadi.play(aniList[aniListCounter], true);
+            }
+
+            if(skadiSide != 0) {
+                skadiSide = 0;
+                skadi.setScale(-1, 1);
+            }
+
+            skadi.x -= 1.5;
+            
+        }
+        else if (this.cursors.right.isDown)
+        {
+            if(aniListCounter != 7) {
+                aniListCounter = 7;
+                skadi.play(aniList[aniListCounter], true);
+            }
+
+            if(skadiSide != 1) {
+                skadiSide = 1;
+                skadi.setScale(1, 1);
+            }
+
+            skadi.x += 1.5;
+        }
+        else
+        {
+            if(aniListCounter != 5) {
+                aniListCounter = 5;
+                skadi.play(aniList[aniListCounter], true);
+                
+            }            
+        }
+        skadi_colider.x = skadi.x;
 
 
     }
+
 }
 
 const config = {
