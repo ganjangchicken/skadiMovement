@@ -1,9 +1,13 @@
 let skadi = 0;
 let skadi_colider = 0;
 let aniList = [];
-let aniListCounter = 0;
-let skadiSide = 0; // 0 : left, 1: right
-
+let aniListIdx = 0;
+let skadiSide = 1; // 0 : left, 1: right
+let isAttack = false;
+let attackTimeBuffer = 0;
+let stopBugFixBall = null;
+let stopBugFixBuffer = 0;
+let stopBugFixFlag = false;
 
 const button = (scene, x, y, texture, cb) => {
     scene.add
@@ -41,12 +45,12 @@ class Example extends Phaser.Scene
     create ()
     {
         this.matter.world.setBounds();
-        aniListCounter = 7;
+        aniListIdx = 7;
         
         skadi = this.add.spine(400, 600, 'skadi_summer', 'custom/move', true);
         skadi.setInteractive()
-        
         this.input.enableDebug(skadi, 0xff00ff);
+        console.dir(skadi.play)
 
         aniList = skadi.getAnimationList();
         console.log(aniList);
@@ -54,15 +58,15 @@ class Example extends Phaser.Scene
         button(this, 120, 50, 'up', () => {
             console.log("click");
 
-            if(aniListCounter == 0) {
-                aniListCounter = 5;
-            }else if(aniListCounter == 5){
-                aniListCounter = 7;
+            if(aniListIdx == 0) {
+                aniListIdx = 5;
+            }else if(aniListIdx == 5){
+                aniListIdx = 7;
             }else {
-                aniListCounter = 0
+                aniListIdx = 0
             }
 
-            skadi.play(aniList[aniListCounter], true);
+            skadi.play(aniList[aniListIdx], true);
 
         })
 
@@ -77,30 +81,35 @@ class Example extends Phaser.Scene
         this.matter.add.mouseSpring();
         
         skadi_colider = this.add.ellipse(
-            skadi.x, skadi.y - skadi.height / 2, skadi.width / 2, skadi.height
+            skadi.x, skadi.y - (skadi.height / 2 + 2), skadi.width / 2, skadi.height
         );
         skadi_colider.setStrokeStyle(2, 0x1a65ac);
         const points = skadi_colider.pathData.slice(0, -2).join(' ');
         this.shield = this.matter.add.gameObject(skadi_colider, {
-            shape: { type: 'fromVerts', verts: points, flagInternal: true },
-            isStatic : true
+            shape: { type: 'fromVerts', verts: points, flagInternal: false },
+            isStatic : false,
+            setInteractive : true
         });
+        skadi_colider.setFixedRotation();
+        console.dir(skadi_colider)
         
         
-        //skadi_colider = ellipse;
-
+        // key event
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
+
+        //stopBugFixBall = this.matter.add.circle(100, 100, 5);
         
     }
 
     update() {
         
-        if (this.cursors.left.isDown)
+        if (this.cursors.left.isDown && !isAttack)
         {
-            if(aniListCounter != 7) {
-                aniListCounter = 7;
-                skadi.play(aniList[aniListCounter], true);
+            if(aniListIdx != 7) {
+                aniListIdx = 7;
+                skadi.play(aniList[aniListIdx], true);
             }
 
             if(skadiSide != 0) {
@@ -108,14 +117,14 @@ class Example extends Phaser.Scene
                 skadi.setScale(-1, 1);
             }
 
-            skadi.x -= 1.5;
-            
+            //skadi.x -= 1.5;
+            skadi_colider.setVelocityX(-2);
         }
-        else if (this.cursors.right.isDown)
+        else if (this.cursors.right.isDown  && !isAttack)
         {
-            if(aniListCounter != 7) {
-                aniListCounter = 7;
-                skadi.play(aniList[aniListCounter], true);
+            if(aniListIdx != 7) {
+                aniListIdx = 7;
+                skadi.play(aniList[aniListIdx], true);
             }
 
             if(skadiSide != 1) {
@@ -123,19 +132,53 @@ class Example extends Phaser.Scene
                 skadi.setScale(1, 1);
             }
 
-            skadi.x += 1.5;
+            //skadi.x += 1.5;
+            skadi_colider.setVelocityX(2);
         }
         else
         {
-            if(aniListCounter != 5) {
-                aniListCounter = 5;
-                skadi.play(aniList[aniListCounter], true);
+            if(aniListIdx != 5  && !isAttack) {
+                aniListIdx = 5;
+                skadi.play(aniList[aniListIdx], true);
                 
-            }            
+            }   
+            skadi_colider.setVelocityX(0);
         }
-        skadi_colider.x = skadi.x;
+        //skadi_colider.x = skadi.x;
+        skadi.x = skadi_colider.x;
+
+        if (Phaser.Input.Keyboard.JustDown(this.spacebar) && !isAttack)
+        {
+            isAttack = true;
+            aniListIdx = 0;
+            skadi.play(aniList[aniListIdx], false);
+            
+        }
+        if(isAttack) {
+            attackTimeBuffer += 1;
+
+            if(attackTimeBuffer > 90) {
+                isAttack = false;
+                attackTimeBuffer = 0;
+                stopBugFixBuffer = 0;
+                stopBugFixFlag = true;
+            }
+        }
+        if(stopBugFixFlag && stopBugFixBuffer == 0) {
+            stopBugFixBuffer += 1;
+            stopBugFixBall = this.matter.add.circle(skadi_colider.x + 1, skadi_colider.y - 110, 5);
+        }
+        if(stopBugFixFlag) {
+            stopBugFixBuffer += 1;
+        }
+        if(stopBugFixBuffer > 5) {
+            console.dir(stopBugFixBall)
+            stopBugFixBuffer = 0;
+            stopBugFixFlag = false;
+        }
 
 
+        
     }
 
 }
