@@ -26,10 +26,10 @@ class Example extends Phaser.Scene
 
     preload ()
     {
-        this.load.image('Originium', '/img/Originium.png');
-        this.load.image('LMD', '/img/LMD.png');
+        this.load.image('Originium', './img/Originium.png');
+        this.load.image('LMD', './img/LMD.png');
 
-        this.load.setPath('/spine');
+        this.load.setPath('./spine');
         this.load.spine('skadi_summer', 'skadi_summer.json', [ 'skadi_summer.atlas' ], true);
 
     }
