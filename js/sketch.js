@@ -61,6 +61,7 @@ class Example extends Phaser.Scene
         });
         skadi_colider.setFixedRotation();
         skadi_colider.setBounce(0.5)
+        skadi_colider.setFriction(0, 0, 0);
 
 
         for(let i = 0; i < ballCount; i ++) {
@@ -68,11 +69,13 @@ class Example extends Phaser.Scene
             ball[i].setCircle();
             ball[i].setScale(0.5);
             ball[i].setBounce(0.96);
+            ball[i].setFriction(0, 0, 0);
         }
         for(let i = 0; i < ballCount; i ++) {
             bill.push(this.matter.add.image(400, 100, 'LMD', Phaser.Math.Between(0, 5)));
             bill[i].setScale(0.5);
             bill[i].setBounce(0.96);
+            bill[i].setFriction(0, 0, 0);
         }
         
         
@@ -107,6 +110,8 @@ class Example extends Phaser.Scene
             }
 
             skadi.x -= 1;
+            
+            
             
         }
         else if (this.cursors.right.isDown  && !isAttack)
