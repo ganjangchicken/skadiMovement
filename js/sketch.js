@@ -6,6 +6,7 @@ let skadiSide = 1; // 0 : left, 1: right
 let isAttack = false;
 let weapon = 0;
 let ball = [];
+let bill = [];
 const ballCount = 10;
 
 const button = (scene, x, y, texture, cb) => {
@@ -85,6 +86,11 @@ class Example extends Phaser.Scene
             ball[i].setCircle();
             ball[i].setScale(0.5);
             ball[i].setBounce(0.96);
+        }
+        for(let i = 0; i < ballCount; i ++) {
+            bill.push(this.matter.add.image(400, 100, '용문폐', Phaser.Math.Between(0, 5)));
+            bill[i].setScale(0.5);
+            bill[i].setBounce(0.96);
         }
         
         
@@ -187,7 +193,8 @@ class Example extends Phaser.Scene
                 for(let i = 0; i < ballCount; i ++) {
                     if(skadiSide == 1 && 
                         (ball[i].x > skadi.x && ball[i].x < skadi.x + 150 &&
-                         ball[i]).y > skadi.y - skadi.height /2) {
+                         ball[i]).y > skadi.y - skadi.height / 2 && 
+                         ball[i].y < skadi.y + skadi.height / 2) {
                             ball[i].setVelocityY(-10);
                             ball[i].setVelocityX(2);
                          }
@@ -197,9 +204,32 @@ class Example extends Phaser.Scene
                 for(let i = 0; i < ballCount; i ++) {
                     if(skadiSide == 0 && 
                         (ball[i].x < skadi.x && ball[i].x > skadi.x - 150 &&
-                         ball[i]).y > skadi.y - skadi.height / 2) {
+                         ball[i]).y > skadi.y - skadi.height / 2 && 
+                         ball[i].y < skadi.y + skadi.height / 2) {
                             ball[i].setVelocityY(-10);
                             ball[i].setVelocityX(-2);
+                         }
+                    
+                }
+
+                for(let i = 0; i < ballCount; i ++) {
+                    if(skadiSide == 1 && 
+                        (bill[i].x > skadi.x && bill[i].x < skadi.x + 150 &&
+                         bill[i]).y > skadi.y - skadi.height /2 && 
+                         bill[i].y < skadi.y + skadi.height / 2) {
+                            bill[i].setVelocityY(-10);
+                            bill[i].setVelocityX(2);
+                         }
+                    
+                }
+
+                for(let i = 0; i < ballCount; i ++) {
+                    if(skadiSide == 0 && 
+                        (bill[i].x < skadi.x && bill[i].x > skadi.x - 150 &&
+                         bill[i]).y > skadi.y - skadi.height / 2 && 
+                         bill[i].y < skadi.y + skadi.height / 2) {
+                            bill[i].setVelocityY(-10);
+                            bill[i].setVelocityX(-2);
                          }
                     
                 }
@@ -222,7 +252,7 @@ const config = {
     physics: {
         default: 'matter',
         matter: {
-            debug: true,
+            debug: false,
             enableSleeping: true,
             gravity : {x : 0, y : 0.3}
         }
