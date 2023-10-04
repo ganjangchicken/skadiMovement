@@ -43,8 +43,8 @@ class Example extends Phaser.Scene
         aniListIdx = 7;
         skadi = this.add.spine(400, 600, 'skadi_summer', 'custom/move', true);
         skadi.setInteractive()
-        this.input.enableDebug(skadi, 0xff00ff);
-        console.dir(skadi.play)
+        //this.input.enableDebug(skadi, 0xff00ff);
+        //console.dir(skadi.play)
 
         aniList = skadi.getAnimationList();
         //console.log(aniList);
@@ -62,6 +62,8 @@ class Example extends Phaser.Scene
         skadi_colider.setFixedRotation();
         skadi_colider.setBounce(0.5)
         skadi_colider.setFriction(0, 0, 0);
+        skadi_colider.alpha = 0;
+        console.dir(skadi_colider);
 
 
         for(let i = 0; i < ballCount; i ++) {
