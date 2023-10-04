@@ -4,10 +4,6 @@ let aniList = [];
 let aniListIdx = 0;
 let skadiSide = 1; // 0 : left, 1: right
 let isAttack = false;
-let attackTimeBuffer = 0;
-let stopBugFixBall = null;
-let stopBugFixBuffer = 0;
-let stopBugFixFlag = false;
 
 const button = (scene, x, y, texture, cb) => {
     scene.add
@@ -26,7 +22,7 @@ class Example extends Phaser.Scene
         super({
             pack: {
                 files: [
-                    { type: 'scenePlugin', key: 'SpinePlugin', url: '../phaser/plugins/spine/dist/SpinePluginDebug.js', sceneKey: 'spine' }
+                    { type: 'scenePlugin', key: 'SpinePlugin', url: 'https://cdn.jsdelivr.net/npm/phaser@3.60.0/plugins/spine/dist/SpinePluginDebug.min.js', sceneKey: 'spine' }
                 ]
             }
         });
@@ -81,7 +77,7 @@ class Example extends Phaser.Scene
         this.matter.add.mouseSpring();
         
         skadi_colider = this.add.ellipse(
-            skadi.x, skadi.y - (skadi.height / 2 + 2), skadi.width / 2, skadi.height
+            skadi.x, skadi.y - (skadi.height / 2 + 20), skadi.width / 2, skadi.height
         );
         skadi_colider.setStrokeStyle(2, 0x1a65ac);
         const points = skadi_colider.pathData.slice(0, -2).join(' ');
@@ -91,6 +87,7 @@ class Example extends Phaser.Scene
             setInteractive : true
         });
         skadi_colider.setFixedRotation();
+        skadi_colider.setBounce(0.5)
         console.dir(skadi_colider)
         
         
@@ -98,8 +95,6 @@ class Example extends Phaser.Scene
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-
-        //stopBugFixBall = this.matter.add.circle(100, 100, 5);
         
     }
 
@@ -117,8 +112,8 @@ class Example extends Phaser.Scene
                 skadi.setScale(-1, 1);
             }
 
-            //skadi.x -= 1.5;
-            skadi_colider.setVelocityX(-2);
+            skadi.x -= 1;
+            
         }
         else if (this.cursors.right.isDown  && !isAttack)
         {
@@ -133,7 +128,8 @@ class Example extends Phaser.Scene
             }
 
             //skadi.x += 1.5;
-            skadi_colider.setVelocityX(2);
+            skadi.x += 1;
+            
         }
         else
         {
@@ -144,40 +140,36 @@ class Example extends Phaser.Scene
             }   
             skadi_colider.setVelocityX(0);
         }
-        //skadi_colider.x = skadi.x;
-        skadi.x = skadi_colider.x;
+        
+        if(skadi_colider.x > skadi.x) {
+            skadi_colider.setVelocityX(-1);
+        }else if(skadi_colider.x < skadi.x) {
+            skadi_colider.setVelocityX(1);
+        }else {
+            skadi_colider.setVelocityX(0);
+        }
+
+        if(skadi_colider.x - skadi.x > 2 || skadi_colider.x - skadi.x < -2) {
+            skadi.x = skadi_colider.x;
+        }
+        skadi.y = skadi_colider.y + skadi.height / 2;
+
 
         if (Phaser.Input.Keyboard.JustDown(this.spacebar) && !isAttack)
         {
             isAttack = true;
             aniListIdx = 0;
             skadi.play(aniList[aniListIdx], false);
-            
-        }
-        if(isAttack) {
-            attackTimeBuffer += 1;
-
-            if(attackTimeBuffer > 90) {
+            setTimeout(() => {
+                console.log("1.5초");
                 isAttack = false;
-                attackTimeBuffer = 0;
-                stopBugFixBuffer = 0;
-                stopBugFixFlag = true;
-            }
-        }
-        if(stopBugFixFlag && stopBugFixBuffer == 0) {
-            stopBugFixBuffer += 1;
-            stopBugFixBall = this.matter.add.circle(skadi_colider.x + 1, skadi_colider.y - 110, 5);
-        }
-        if(stopBugFixFlag) {
-            stopBugFixBuffer += 1;
-        }
-        if(stopBugFixBuffer > 5) {
-            console.dir(stopBugFixBall)
-            stopBugFixBuffer = 0;
-            stopBugFixFlag = false;
-        }
+                // const stopBugFixBall = this.matter.add.circle(skadi_colider.x + 1, skadi_colider.y - 110, 5, 'tempCircle');
+                // setTimeout(() => {
+                //     stopBugFixBall.destroy();
+                // }, 1000);
 
-
+            }, 1500);
+        }
         
     }
 
