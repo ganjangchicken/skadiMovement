@@ -9,14 +9,6 @@ let ball = [];
 let bill = [];
 const ballCount = 10;
 
-const button = (scene, x, y, texture, cb) => {
-    scene.add
-      .image(x, y, texture)
-      .setInteractive()
-      .on('pointerdown', () => {
-        cb()
-      })
-}
 
 class Example extends Phaser.Scene
 {   
@@ -34,9 +26,8 @@ class Example extends Phaser.Scene
 
     preload ()
     {
-        this.load.image('up', '/img/up.png');
-        this.load.image('오리지늄', '/img/오리지늄.png');
-        this.load.image('용문폐', '/img/용문폐.png');
+        this.load.image('Originium', '/img/Originium.png');
+        this.load.image('LMD', '/img/LMD.png');
 
         this.load.setPath('/spine');
         this.load.spine('skadi_summer', 'skadi_summer.json', [ 'skadi_summer.atlas' ], true);
@@ -56,7 +47,7 @@ class Example extends Phaser.Scene
         console.dir(skadi.play)
 
         aniList = skadi.getAnimationList();
-        console.log(aniList);
+        //console.log(aniList);
 
         skadi_colider = this.add.ellipse(
             skadi.x, skadi.y - (skadi.height / 2 + 20), skadi.width / 2, skadi.height
@@ -70,25 +61,16 @@ class Example extends Phaser.Scene
         });
         skadi_colider.setFixedRotation();
         skadi_colider.setBounce(0.5)
-        console.dir(skadi_colider)
 
-        console.log(skadi);
-        console.log(skadi.input);
-
-
-        // etc
-        button(this, 120, 50, 'up', () => {
-            console.log("click");
-        })
 
         for(let i = 0; i < ballCount; i ++) {
-            ball.push(this.matter.add.image(400, 100, '오리지늄', Phaser.Math.Between(0, 5)));
+            ball.push(this.matter.add.image(400, 100, 'Originium', Phaser.Math.Between(0, 5)));
             ball[i].setCircle();
             ball[i].setScale(0.5);
             ball[i].setBounce(0.96);
         }
         for(let i = 0; i < ballCount; i ++) {
-            bill.push(this.matter.add.image(400, 100, '용문폐', Phaser.Math.Between(0, 5)));
+            bill.push(this.matter.add.image(400, 100, 'LMD', Phaser.Math.Between(0, 5)));
             bill[i].setScale(0.5);
             bill[i].setBounce(0.96);
         }
