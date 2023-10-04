@@ -8,6 +8,14 @@ let weapon = 0;
 let ball = [];
 let bill = [];
 const ballCount = 10;
+let keyboardBtn = {
+    left : null,
+    right : null,
+    up : null,
+    down : null,
+    space : null
+};
+let spaceBtnClickFlag = false;
 
 
 class Example extends Phaser.Scene
@@ -28,6 +36,8 @@ class Example extends Phaser.Scene
     {
         this.load.image('Originium', './img/Originium.png');
         this.load.image('LMD', './img/LMD.png');
+        
+        this.load.image('keyboard_space', './img/Keyboard_space.png');
 
         this.load.setPath('./spine');
         this.load.spine('skadi_summer', 'skadi_summer.json', [ 'skadi_summer.atlas' ], true);
@@ -37,7 +47,16 @@ class Example extends Phaser.Scene
     create ()
     {
         this.matter.world.setBounds();
+
+        // console bar
+        this.matter.add.rectangle(400, 600, 800, 100, {isStatic: true});
         
+        keyboardBtn.space = this.add.image(550, 750, 'keyboard_space', {isStatic : true});
+        keyboardBtn.space.setScale(2.5, 2.5);
+        keyboardBtn.space.setInteractive();
+        keyboardBtn.space.on('pointerdown', () => {
+            spaceBtnClickFlag = true;
+        });
 
         // skadi skeleton settings
         aniListIdx = 7;
@@ -91,7 +110,7 @@ class Example extends Phaser.Scene
         // key event
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
+        
         // mouse event
         this.matter.add.mouseSpring();
         
@@ -99,7 +118,9 @@ class Example extends Phaser.Scene
 
     update() {
         
-        if (this.cursors.left.isDown && !isAttack)
+        //movement
+        // move left
+        if (this.cursors.left.isDown && !isAttack) 
         {
             if(aniListIdx != 9) {
                 aniListIdx = 9;
@@ -115,7 +136,7 @@ class Example extends Phaser.Scene
             
             
             
-        }
+        } // move right
         else if (this.cursors.right.isDown  && !isAttack)
         {
             if(aniListIdx != 9) {
@@ -128,22 +149,22 @@ class Example extends Phaser.Scene
                 skadi.setScale(1, 1);
             }
 
-            //skadi.x += 1.5;
             skadi.x += 1;
             
-        }else if(this.cursors.up.isDown && !isAttack){
+        } // look up
+        else if(this.cursors.up.isDown && !isAttack){
             if(aniListIdx != 8) {
                 aniListIdx = 8;
                 skadi.play(aniList[aniListIdx], false);
             }
-        }
+        } // look down
         else if(this.cursors.down.isDown && !isAttack){
             if(aniListIdx != 7) {
                 aniListIdx = 7;
                 skadi.play(aniList[aniListIdx], false);
             }
         }
-        else
+        else // idle
         {
             if(aniListIdx != 5  && !isAttack) {
                 aniListIdx = 5;
@@ -153,6 +174,7 @@ class Example extends Phaser.Scene
             skadi_colider.setVelocityX(0);
         }
         
+        // skadi physics setting
         if(skadi_colider.x > skadi.x) {
             skadi_colider.setVelocityX(-1);
         }else if(skadi_colider.x < skadi.x) {
@@ -167,8 +189,8 @@ class Example extends Phaser.Scene
         skadi.y = skadi_colider.y + skadi.height / 2;
 
         
-
-        if (Phaser.Input.Keyboard.JustDown(this.spacebar) && !isAttack)
+        // attack motion, effect
+        if ((Phaser.Input.Keyboard.JustDown(this.spacebar) || spaceBtnClickFlag) && !isAttack)
         {
             isAttack = true;
             aniListIdx = 0;
@@ -176,6 +198,7 @@ class Example extends Phaser.Scene
             setTimeout(() => {
                 console.log("1.5초");
                 isAttack = false;
+                spaceBtnClickFlag = false;
             }, 1400);
             
             setTimeout(() => {
@@ -219,15 +242,10 @@ class Example extends Phaser.Scene
                          bill[i].y < skadi.y + skadi.height / 2) {
                             bill[i].setVelocityY(-10);
                             bill[i].setVelocityX(-2);
-                         }
-                    
+                         }   
                 }
-
             }, 800);
-            
-            
         }
-        
     }
 
 }
@@ -236,12 +254,12 @@ const config = {
     type: Phaser.WEBGL,
     parent: 'phaser-example',
     width: 800,
-    height: 600,
+    height: 800,
     backgroundColor: '#2d2d2d',
     physics: {
         default: 'matter',
         matter: {
-            debug: false,
+            debug: true,
             enableSleeping: true,
             gravity : {x : 0, y : 0.3}
         }
