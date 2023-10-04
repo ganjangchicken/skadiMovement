@@ -4,6 +4,9 @@ let aniList = [];
 let aniListIdx = 0;
 let skadiSide = 1; // 0 : left, 1: right
 let isAttack = false;
+let weapon = 0;
+let ball = [];
+const ballCount = 10;
 
 const button = (scene, x, y, texture, cb) => {
     scene.add
@@ -30,19 +33,22 @@ class Example extends Phaser.Scene
 
     preload ()
     {
-        this.load.setPath('../spine');
+        this.load.image('up', '/img/up.png');
+        this.load.image('오리지늄', '/img/오리지늄.png');
+        this.load.image('용문폐', '/img/용문폐.png');
+
+        this.load.setPath('/spine');
         this.load.spine('skadi_summer', 'skadi_summer.json', [ 'skadi_summer.atlas' ], true);
 
-        this.load.image('up', '../img/up.png');
-        this.load.image('오리지늄', '../img/오리지늄.png');
-        this.load.image('용문폐', '../img/용문폐.png');
     }
 
     create ()
     {
         this.matter.world.setBounds();
-        aniListIdx = 7;
         
+
+        // skadi skeleton settings
+        aniListIdx = 7;
         skadi = this.add.spine(400, 600, 'skadi_summer', 'custom/move', true);
         skadi.setInteractive()
         this.input.enableDebug(skadi, 0xff00ff);
@@ -51,31 +57,6 @@ class Example extends Phaser.Scene
         aniList = skadi.getAnimationList();
         console.log(aniList);
 
-        button(this, 120, 50, 'up', () => {
-            console.log("click");
-
-            if(aniListIdx == 0) {
-                aniListIdx = 5;
-            }else if(aniListIdx == 5){
-                aniListIdx = 7;
-            }else {
-                aniListIdx = 0
-            }
-
-            skadi.play(aniList[aniListIdx], true);
-
-        })
-
-        const ball = this.matter.add.image(400, 100, '오리지늄', Phaser.Math.Between(0, 5));
-
-        ball.setCircle();
-        ball.setBounce(0.96);
-      
-        console.log(skadi);
-        console.log(skadi.input);
-        
-        this.matter.add.mouseSpring();
-        
         skadi_colider = this.add.ellipse(
             skadi.x, skadi.y - (skadi.height / 2 + 20), skadi.width / 2, skadi.height
         );
@@ -89,12 +70,37 @@ class Example extends Phaser.Scene
         skadi_colider.setFixedRotation();
         skadi_colider.setBounce(0.5)
         console.dir(skadi_colider)
+
+        console.log(skadi);
+        console.log(skadi.input);
+
+
+        // etc
+        button(this, 120, 50, 'up', () => {
+            console.log("click");
+        })
+
+        for(let i = 0; i < ballCount; i ++) {
+            ball.push(this.matter.add.image(400, 100, '오리지늄', Phaser.Math.Between(0, 5)));
+            ball[i].setCircle();
+            ball[i].setScale(0.5);
+            ball[i].setBounce(0.96);
+        }
+        
+        
+        
+        
+        
+        
+        
         
         
         // key event
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
+        // mouse event
+        this.matter.add.mouseSpring();
         
     }
 
@@ -102,8 +108,8 @@ class Example extends Phaser.Scene
         
         if (this.cursors.left.isDown && !isAttack)
         {
-            if(aniListIdx != 7) {
-                aniListIdx = 7;
+            if(aniListIdx != 9) {
+                aniListIdx = 9;
                 skadi.play(aniList[aniListIdx], true);
             }
 
@@ -117,8 +123,8 @@ class Example extends Phaser.Scene
         }
         else if (this.cursors.right.isDown  && !isAttack)
         {
-            if(aniListIdx != 7) {
-                aniListIdx = 7;
+            if(aniListIdx != 9) {
+                aniListIdx = 9;
                 skadi.play(aniList[aniListIdx], true);
             }
 
@@ -130,6 +136,17 @@ class Example extends Phaser.Scene
             //skadi.x += 1.5;
             skadi.x += 1;
             
+        }else if(this.cursors.up.isDown && !isAttack){
+            if(aniListIdx != 8) {
+                aniListIdx = 8;
+                skadi.play(aniList[aniListIdx], false);
+            }
+        }
+        else if(this.cursors.down.isDown && !isAttack){
+            if(aniListIdx != 7) {
+                aniListIdx = 7;
+                skadi.play(aniList[aniListIdx], false);
+            }
         }
         else
         {
@@ -154,6 +171,7 @@ class Example extends Phaser.Scene
         }
         skadi.y = skadi_colider.y + skadi.height / 2;
 
+        
 
         if (Phaser.Input.Keyboard.JustDown(this.spacebar) && !isAttack)
         {
@@ -163,12 +181,32 @@ class Example extends Phaser.Scene
             setTimeout(() => {
                 console.log("1.5초");
                 isAttack = false;
-                // const stopBugFixBall = this.matter.add.circle(skadi_colider.x + 1, skadi_colider.y - 110, 5, 'tempCircle');
-                // setTimeout(() => {
-                //     stopBugFixBall.destroy();
-                // }, 1000);
+            }, 1400);
+            
+            setTimeout(() => {
+                for(let i = 0; i < ballCount; i ++) {
+                    if(skadiSide == 1 && 
+                        (ball[i].x > skadi.x && ball[i].x < skadi.x + 150 &&
+                         ball[i]).y > skadi.y - skadi.height /2) {
+                            ball[i].setVelocityY(-10);
+                            ball[i].setVelocityX(2);
+                         }
+                    
+                }
 
-            }, 1500);
+                for(let i = 0; i < ballCount; i ++) {
+                    if(skadiSide == 0 && 
+                        (ball[i].x < skadi.x && ball[i].x > skadi.x - 150 &&
+                         ball[i]).y > skadi.y - skadi.height / 2) {
+                            ball[i].setVelocityY(-10);
+                            ball[i].setVelocityX(-2);
+                         }
+                    
+                }
+
+            }, 800);
+            
+            
         }
         
     }
@@ -185,7 +223,8 @@ const config = {
         default: 'matter',
         matter: {
             debug: true,
-            enableSleeping: true
+            enableSleeping: true,
+            gravity : {x : 0, y : 0.3}
         }
     },
     scene: Example
